@@ -1,41 +1,62 @@
-import numpy as np
+📌 1. Libraries You Used
 
-import pandas as pd
+i used four main Python libraries:
 
-import seaborn as sns
+1. NumPy
 
-import matplotlib.pyplot as plt
+For numerical operations
 
-df = pd.read_csv(r'C:\Users\User\OneDrive\Desktop\data\mobilegame.csv')
-df.head()
+Helps handle arrays and statistical calculations
 
-<img width="667" height="262" alt="image" src="https://github.com/user-attachments/assets/6f92fbc4-05ae-4cba-be1e-040b388dd32c" />
+2. Pandas
 
-df.isna().sum()
+To load the dataset
 
-#T-TEST-- Yeni versiyon oyuncuların daha fazla oyun oynayıp oynamadığını test etmek.
+To clean data and filter rows
 
-from scipy import stats
-group_30 = df[df['version'] == 'gate_30']['sum_gamerounds']
-group_40 = df[df['version'] == 'gate_40']['sum_gamerounds']
-t_stat, p_value = stats.ttest_ind(group_30, group_40, equal_var=False)
-print(f"T-istatistiği: {t_stat:.3f}, p-değeri: {p_value:.3f}")
+To explore columns such as version, sum_gamerounds, retention_1, retention_7
 
-# Retention analyze
-from statsmodels.stats.proportion import proportions_ztest
+3. Seaborn
 
-# retention aanalizi -- Her gruptaki 'True' sayısı ve toplam kullanıcı sayısı ,7 gun icerisinde donus orani
-success = [df[df['version']=='gate_30']['retention_7'].sum(),
-            df[df['version']=='gate_40']['retention_7'].sum()]
-nobs = [df[df['version']=='gate_30'].shape[0],
-         df[df['version']=='gate_40'].shape[0]]
+For visualization (if needed)
 
-z_stat, p_value = proportions_ztest(success, nobs)
+Helps create charts
 
-print(f"Z-istatistiği: {z_stat:.3f}, p-değeri: {p_value:.3f}")
+4. Matplotlib
 
-##hangisinde fark oldgunu anlamak icin df.groupby
+Basic plotting and visual analysis
 
-df.groupby('version')['sum_gamerounds'].mean()
+5. SciPy (stats module)
 
-<img width="385" height="145" alt="image" src="https://github.com/user-attachments/assets/09dca565-e535-4820-b938-c6ecea45fda6" />
+Used to perform the T-test
+
+Helps compare the average gamerounds between two groups (gate_30 vs gate_40)
+
+6. Statsmodels (proportion tests)
+
+Used to perform the Z-test for proportions
+
+Helps compare retention rates between the two groups
+
+📌 2. Main Analyses You Performed
+A. T-Test (Comparison of average game rounds)
+
+You tested whether players in the new version played more or fewer game rounds compared to the old version.
+
+B. 7-Day Retention Z-Test
+
+You tested whether the percentage of returning players after 7 days is different between the two versions.
+
+C. Group Comparison
+
+You compared the average gamerounds of each version to see which performed better.
+
+📌 3. Purpose of the Analysis
+
+The goal was to answer two questions:
+
+Does the new version increase engagement?
+(Measured with sum_gamerounds)
+
+Does the new version improve retention?
+(Measured with retention_7)
