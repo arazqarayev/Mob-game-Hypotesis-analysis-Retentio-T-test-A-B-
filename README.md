@@ -1,4 +1,28 @@
-📌 1. Libraries You Used
+
+
+📌 1. Main Analyses You Performed A. T-Test (Comparison of average game rounds)
+
+You tested whether players in the new version played more or fewer game rounds compared to the old version.
+
+B. 7-Day Retention Z-Test
+
+You tested whether the percentage of returning players after 7 days is different between the two versions.
+
+C. Group Comparison
+
+You compared the average gamerounds of each version to see which performed better.
+
+📌 2. Purpose of the Analysis
+
+The goal was to answer two questions:
+
+Does the new version increase engagement? (Measured with sum_gamerounds)
+
+Does the new version improve retention? (Measured with retention_7)
+
+
+
+📌 3. Libraries You Used
 
 i used four main Python libraries:
 
@@ -38,25 +62,3 @@ Used to perform the Z-test for proportions
 
 Helps compare retention rates between the two groups
 
-📌 2. Main Analyses You Performed
-A. T-Test (Comparison of average game rounds)
-
-You tested whether players in the new version played more or fewer game rounds compared to the old version.
-
-B. 7-Day Retention Z-Test
-
-You tested whether the percentage of returning players after 7 days is different between the two versions.
-
-C. Group Comparison
-
-You compared the average gamerounds of each version to see which performed better.
-
-📌 3. Purpose of the Analysis
-
-The goal was to answer two questions:
-
-Does the new version increase engagement?
-(Measured with sum_gamerounds)
-
-Does the new version improve retention?
-(Measured with retention_7)
