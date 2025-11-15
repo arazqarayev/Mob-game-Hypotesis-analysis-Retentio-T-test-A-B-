@@ -1,0 +1,41 @@
+import numpy as np
+
+import pandas as pd
+
+import seaborn as sns
+
+import matplotlib.pyplot as plt
+
+df = pd.read_csv(r'C:\Users\User\OneDrive\Desktop\data\mobilegame.csv')
+df.head()
+
+<img width="667" height="262" alt="image" src="https://github.com/user-attachments/assets/6f92fbc4-05ae-4cba-be1e-040b388dd32c" />
+
+df.isna().sum()
+
+#T-TEST-- Yeni versiyon oyuncuların daha fazla oyun oynayıp oynamadığını test etmek.
+
+from scipy import stats
+group_30 = df[df['version'] == 'gate_30']['sum_gamerounds']
+group_40 = df[df['version'] == 'gate_40']['sum_gamerounds']
+t_stat, p_value = stats.ttest_ind(group_30, group_40, equal_var=False)
+print(f"T-istatistiği: {t_stat:.3f}, p-değeri: {p_value:.3f}")
+
+# Retention analyze
+from statsmodels.stats.proportion import proportions_ztest
+
+# retention aanalizi -- Her gruptaki 'True' sayısı ve toplam kullanıcı sayısı ,7 gun icerisinde donus orani
+success = [df[df['version']=='gate_30']['retention_7'].sum(),
+            df[df['version']=='gate_40']['retention_7'].sum()]
+nobs = [df[df['version']=='gate_30'].shape[0],
+         df[df['version']=='gate_40'].shape[0]]
+
+z_stat, p_value = proportions_ztest(success, nobs)
+
+print(f"Z-istatistiği: {z_stat:.3f}, p-değeri: {p_value:.3f}")
+
+##hangisinde fark oldgunu anlamak icin df.groupby
+
+df.groupby('version')['sum_gamerounds'].mean()
+
+<img width="385" height="145" alt="image" src="https://github.com/user-attachments/assets/09dca565-e535-4820-b938-c6ecea45fda6" />
