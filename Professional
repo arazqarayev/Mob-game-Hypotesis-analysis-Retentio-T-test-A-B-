@@ -1,0 +1,87 @@
+#A/B Testi — Adım Adım (Cookie Cats Örneği)
+Amaç: version (ör. gate_30 vs gate_40) grupları arasında oyuncu davranışlarında anlamlı fark var mı? Metri̇kler: sum_gamerounds (sayı), retention_1/retention_7 (oran).
+0) Kurulum ve Veri Yükleme
+
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from scipy import stats
+from statsmodels.stats.proportion import proportions_ztest, proportion_confint
+from statsmodels.stats.power import TTestIndPower
+
+df = pd.read_csv(r'C:\Users\User\OneDrive\Desktop\data\mobilegame.csv')
+df.head()
+df.info()
+
+1) Hızlı Veri Kontrolü
+
+print("NA sayıları:\n", df.isna().sum())
+is_unique = df['userid'].nunique() == df.shape[0]
+print("Her satır tek bir kullanıcı mı? :", is_unique)
+print(df['version'].value_counts())
+
+2) Özet İstatistikler ve Aykırı Değer Keşfi
+
+desc = df['sum_gamerounds'].describe(percentiles=[.01,.05,.1,.2,.8,.9,.95,.99])
+print(desc)
+df.boxplot(column='sum_gamerounds', by='version'); plt.title('sum_gamerounds by version'); plt.suptitle('')
+df['sum_gamerounds'].hist(bins=50); plt.title('sum_gamerounds histogram'); plt.show()
+
+upper = df['sum_gamerounds'].quantile(0.99)
+df_trim = df[df['sum_gamerounds'] <= upper].copy()
+df['log_sum_gamerounds'] = np.log1p(df['sum_gamerounds'])
+
+3) Hipotez 1 — Ortalama Oyun Sayısı Farkı (Welch t-test)
+
+g30 = df[df['version']=='gate_30']['sum_gamerounds']
+g40 = df[df['version']=='gate_40']['sum_gamerounds']
+
+t_stat, p_val = stats.ttest_ind(g30, g40, equal_var=False)
+print(f"Welch t-istat: {t_stat:.3f}, p-değeri: {p_val:.3f}")
+
+def cohens_d(a, b):
+    na, nb = len(a), len(b)
+    sa, sb = np.var(a, ddof=1), np.var(b, ddof=1)
+    s_pooled = np.sqrt(((na-1)*sa + (nb-1)*sb) / (na+nb-2))
+    return (np.mean(a) - np.mean(b)) / s_pooled
+
+d = cohens_d(g40, g30)
+print(f"Cohen's d: {d:.3f}")
+
+4) Hipotez 2 — 7. Gün Retention Oranı Farkı (Proportion Test)
+
+ret_col = 'retention_7'
+succ_30 = df[df['version']=='gate_30'][ret_col].sum()
+n_30 = df[df['version']=='gate_30'].shape[0]
+succ_40 = df[df['version']=='gate_40'][ret_col].sum()
+n_40 = df[df['version']=='gate_40'].shape[0]
+
+z_stat, p_prop = proportions_ztest([succ_30, succ_40], [n_30, n_40])
+print(f"Z-istat: {z_stat:.3f}, p-değeri: {p_prop:.3f}")
+
+ci_30 = proportion_confint(succ_30, n_30, method='wilson')
+ci_40 = proportion_confint(succ_40, n_40, method='wilson')
+print(f"gate_30 p̂={succ_30/n_30:.3f}, CI95={ci_30}")
+print(f"gate_40 p̂={succ_40/n_40:.3f}, CI95={ci_40}")
+
+lift = (succ_40/n_40) - (succ_30/n_30)
+print(f"Mutlak fark (gate_40 - gate_30): {lift:.4f}")
+
+5) Güç (Power) ve Örneklem Planlama
+
+analysis = TTestIndPower()
+effect = abs(d) if d != 0 else 0.2
+required_n = analysis.solve_power(effect_size=effect, alpha=0.05, power=0.8, alternative='two-sided')
+print(f"80% güç için kişi başı yaklaşık örneklem: {required_n:.0f}")
+
+6) Sonuç ve Kaydetme
+
+df.to_csv('ab_mobilegame_clean.csv', index=False)
+summary = {
+    "t_stat": [t_stat], "p_ttest": [p_val],
+    "z_stat": [z_stat], "p_prop": [p_prop],
+    "cohens_d": [d], "lift_ret7": [lift]
+}
+pd.DataFrame(summary).to_csv('ab_results_summary.csv', index=False)
+print("Dosyalar kaydedildi.")
+
